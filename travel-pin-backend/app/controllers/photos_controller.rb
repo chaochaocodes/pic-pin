@@ -6,7 +6,12 @@ class PhotosController < ApplicationController
     render json: photos
   end
 
+  def new
+    photo = Photo.new
+  end
+
   def create
+    puts photo_params
     photo = Photo.new(photo_params)
     if photo.save
       render json: photo

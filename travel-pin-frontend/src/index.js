@@ -283,7 +283,7 @@ function makePhotoCard(photo) {
     a1.textContent = "New Board"
     a1.style.color = "green"
 
-    fetchBoards(dropdownContentDiv, a1)
+    fetchBoards(dropdownContentDiv, a1, photo)
 
 
     dropdownDiv.appendChild(dropdownContentDiv)
@@ -304,29 +304,63 @@ function listenForExplore() {
 }
 
 // board dropdown
-function fetchBoards(dropdownContentDiv, a1) {
+function fetchBoards(dropdownContentDiv, a1, photo) {
     fetch("http://localhost:3000/boards")
         .then((res) => {
             return res.json();
         })
         .then((jsonData) => {
             console.log(jsonData);
-            const boards = []
-            jsonData.forEach(board => {
-                if (board.user_id == currentUser.id) {
-                    boards.push(board)
-                }
-            });
-            console.log(boards)
-            boards.forEach(board => {
-                const a = document.createElement("a")
-                a.innerText = board.title
-                dropdownContentDiv.appendChild(a)
-                // dropdownContentDiv.appendChild(a1)
-            });
+            getUserBoards(jsonData, dropdownContentDiv, photo)
+
         }).catch((error) => {
             console.error("Fetch pictures Error", error);
         });
+}
+
+function getUserBoards(jsonData, dropdownContentDiv, photo) {
+    console.log("Boards", jsonData);
+    const boards = []
+    jsonData.forEach(board => {
+        if (board.user_id == currentUser.id) {
+            boards.push(board)
+        }
+    });
+    console.log(boards)
+    boards.forEach(board => {
+        const a = document.createElement("a")
+        a.innerText = board.title
+        a.id = board.id
+        a.addEventListener("click", () => {
+            postPhotos(a.id, photo)
+        })
+        dropdownContentDiv.appendChild(a)
+    });
+}
+
+// function clickableBoardDropdown(link) {
+//     link.addEventListener("click", () => {
+//         postPhotos(link.id)
+//     })
+// }
+
+function postPhotos(boardId, photo) {
+    console.log(boardId)
+    fetch('http://localhost:3000/photos', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+        },
+        body: JSON.stringify({ board_id: boardId, url: photo.urls.regular })
+    })
+        .then(res => {
+            return res.json()
+        })
+        .then(data => {
+            console.log(data)
+        })
+        .catch(err => console.log(`ERROR:${err}`))
 }
 
 function hideModal() {
